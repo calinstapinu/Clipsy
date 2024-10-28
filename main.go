@@ -133,43 +133,6 @@ func uploadVideoHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-//func deleteVideoHandler(db *sql.DB) http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		if r.Method == http.MethodPost {
-//			id := r.FormValue("id")
-//			deleteSQL := `DELETE FROM videos WHERE id = ?`
-//			_, err := db.Exec(deleteSQL, id)
-//			if err != nil {
-//				log.Println("Error deleting video:", err)
-//				http.Error(w, "Error deleting video", http.StatusInternalServerError)
-//				return
-//			}
-//			w.WriteHeader(http.StatusOK) // Respond with 200 OK
-//		} else {
-//			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//		}
-//	}
-//}
-
-//func deleteVideoHandler(db *sql.DB) http.HandlerFunc {
-//	return func(w http.ResponseWriter, r *http.Request) {
-//		if r.Method == http.MethodPost {
-//			id := r.FormValue("id")
-//			deleteSQL := `DELETE FROM videos WHERE id = ?`
-//			_, err := db.Exec(deleteSQL, id)
-//			if err != nil {
-//				log.Println("Error deleting video:", err)
-//				http.Error(w, "Error deleting video", http.StatusInternalServerError)
-//				return
-//			}
-//			// Return 204 No Content to indicate success
-//			w.WriteHeader(http.StatusNoContent)
-//		} else {
-//			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//		}
-//	}
-//}
-
 func deleteVideoHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
