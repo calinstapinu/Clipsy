@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 <div class="container mx-auto p-6">
-    <!-- Upload Section -->
+    <!-- Upload Section-->
     <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
         <h1 class="text-2xl font-bold mb-4 text-center">Upload and Manage Videos</h1>
         <form hx-post="/upload"
@@ -19,11 +19,18 @@
               hx-encoding="multipart/form-data"
               method="post"
               enctype="multipart/form-data" class="space-y-4">
-            <input type="text" name="title" placeholder="Title" required class="border rounded-md p-2 w-full">
-            <input type="text" name="description" placeholder="Description" required class="border rounded-md p-2 w-full">
-            <input type="text" name="genre" placeholder="Genre" required class="border rounded-md p-2 w-full">
-            <input type="file" name="video" accept="video/*" required class="border rounded-md p-2 w-full">
-            <input type="submit" value="Upload" class="bg-purple-500 text-white rounded-md p-2 w-full cursor-pointer transition duration-900 ease-in-out transform hover:bg-purple-900 ">
+
+            <div id="drop-area" class="border-2 border-dashed rounded-xl border-purple-800 p-4 text-center mb-4 cursor-pointer">
+                <p class="text-gray-600 text-center font-semibold pt-1">Drag & drop your video files here or click to select</p>
+                <input type="file" name="video" accept="video/*" required class="hidden" id="fileElem">
+                <p id="file-name" class="mt-2 text-gray-700"></p> <!-- This will show the name of the dropped file -->
+            </div>
+
+            <input type="text" name="title" placeholder="Rename your video!" required class="border rounded-md p-2 w-full">
+            <input type="text" name="description" placeholder="Add a short description" required class="border rounded-md p-2 w-full">
+            <input type="text" name="genre" placeholder="Choose a genre" required class="border rounded-md p-2 w-full">
+<!--            <input type="file" name="video" accept="video/*" required class="border rounded-md p-2 w-full">-->
+            <input type="submit" value="Convert" class="bg-purple-500 text-white rounded-md p-2 w-full cursor-pointer transition duration-900 ease-in-out transform hover:bg-purple-900 ">
         </form>
     </div>
 
@@ -63,5 +70,6 @@
         </table>
     </div>
 </div>
+<script src="/Front/upload.js"></script>
 </body>
 </html>
