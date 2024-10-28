@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fileElem.click();
     });
 
+
     // Event listener for file input change
     fileElem.addEventListener('change', () => {
         // Check if a file was selected
