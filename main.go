@@ -109,10 +109,10 @@ func uploadVideoHandler(db *sql.DB) http.HandlerFunc {
                 <td class="border p-2">{{.Genre}}</td>
                 <td class="border p-2">{{.UploadDate}}</td>
                 <td class="border p-2">
-                    <a href="/download?id={{.ID}}" class="text-blue-500 hover:underline">Download</a>
-                    <form action="/delete" method="post" hx-trigger="submit" hx-encoding="multipart/form-data" hx-target="closest tr" hx-swap="outerHTML" enctype="multipart/form-data"> style="display:inline;">
+                    <a href="/download?id={{.ID}}" class="rounded-lg border-solid border-2 border-purple-500 pl-3 pr-3 pb-1 pt-1 text-purple-500 font-semibold transition duration-900 ease-in-out transform hover:bg-purple-500 hover:text-white hover:border-slate-400">Download</a>
+                    <form action="/delete" method="post" hx-trigger="submit" hx-encoding="multipart/form-data" hx-target="closest tr" hx-swap="outerHTML" class="inline" enctype="multipart/form-data">
                         <input type="hidden" name="id" value="{{.ID}}">
-                        <input type="submit" value="Delete" class="text-red-500 cursor-pointer">
+                        <input type="submit" value="Delete" class="pl-3 pr-3 bg-transparent font-medium cursor-pointer">
                     </form>
                 </td>
             </tr>
