@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const fileElem = document.getElementById("fileElem");
     const fileNameDisplay = document.getElementById("file-name");
 
-    // Prevent default behaviors for drag and drop events
+    // Prevent default behaviors for drag and drop event
     ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
         document.body.addEventListener(eventName, preventDefaults, false);
