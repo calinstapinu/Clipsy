@@ -1,14 +1,20 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/google/go-github/v39/github"
+	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/oauth2"
 )
 
 type Video struct {
@@ -17,6 +23,44 @@ type Video struct {
 	Description string
 	Genre       string
 	UploadDate  string
+}
+
+// User struct to represent user details
+type User struct {
+	ID    int
+	Email string
+}
+
+var (
+	oauth2Config = &oauth2.Config{
+		ClientID:     "Ov23li2sU5eoKNPdcAYc",
+		ClientSecret: "f36cc218ba891c5a850250db76b2e263e70768f9",
+		RedirectURL:  "http://localhost:6969/auth/github/callback",
+		Scopes:       []string{"user:email"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+		},
+	}
+	state string
+)
+
+func generateRandomString(length int) (string, error) {
+	bytes := make([]byte, length)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(bytes), nil
+}
+
+// Initialize state with a secure random string
+func init() {
+	var err error
+	state, err = generateRandomString(32) // Generate a secure random string for CSRF protection
+	if err != nil {
+		log.Fatal("Failed to generate state:", err)
+	}
 }
 
 func initDB() (*sql.DB, error) {
@@ -214,19 +258,73 @@ func mainPageHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// Auth handler for GitHub login
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Client ID:", os.Getenv("GITHUB_CLIENT_ID"))
+	log.Println("Client Secret:", os.Getenv("GITHUB_CLIENT_SECRET"))
+
+	url := oauth2Config.AuthCodeURL(state)
+	log.Println("Redirecting to URL:", url) // Add this log line to debug the URL
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func callbackHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		code := r.FormValue("code")
+		log.Println("Received code:", code) // Log the received code
+
+		token, err := oauth2Config.Exchange(r.Context(), code)
+		if err != nil {
+			http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
+			log.Println("Token exchange error:", err)
+			return
+		}
+
+		log.Println("Token exchanged successfully") // Confirm token exchange
+
+		client := github.NewClient(oauth2Config.Client(r.Context(), token))
+		user, _, err := client.Users.Get(r.Context(), "")
+		if err != nil {
+			log.Println("Failed to get user info:", err) // Log the error
+			http.Error(w, "Failed to get user info", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("Logged in user: %s", user.Login)           // Log the logged-in user
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect) // Redirect to the main page
+	}
+}
+
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Current working directory:", wd)
+
+	// After loading, log the values to check if they're loaded correctly
+	log.Println("Client ID:", os.Getenv("GITHUB_CLIENT_ID"))
+	log.Println("Client Secret:", os.Getenv("GITHUB_CLIENT_SECRET"))
+
 	db, err := initDB()
 	if err != nil {
 		log.Fatal("Failed to initialize the database:", err)
 	}
 	defer db.Close()
 
-	http.HandleFunc("/", mainPageHandler(db)) // Serve the main page with the video list
+	// Set up routes
+	http.HandleFunc("/", mainPageHandler(db))
 	http.HandleFunc("/upload", uploadVideoHandler(db))
 	http.HandleFunc("/delete", deleteVideoHandler(db))
 	http.HandleFunc("/download", downloadVideoHandler(db))
+	http.HandleFunc("/auth/github", authHandler)
+	http.HandleFunc("/auth/github/callback", callbackHandler(db))
 
-	// Serve static files from the Front directory
 	http.Handle("/Front/", http.StripPrefix("/Front/", http.FileServer(http.Dir("Front"))))
 
 	fmt.Println("Server is running on http://localhost:6969")
