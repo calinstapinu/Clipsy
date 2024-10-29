@@ -31,9 +31,9 @@ Clipsy is crafted to be powerful yet user-friendly, making video organization in
  Step 2: Select between our Video Management Platform or the new Instagram Post Downloader
 ```
 ```
-‎ ‎‎ • If you want to manage a new video simply drag & drop it and modify your desired information
+‎ ‎‎• If you want to manage a new video simply drag & drop it and modify your desired information
 
-‎‎ ‎ ‎• If you want to download an Instagram post/reel simply paste it's URL and click Download
+‎‎ ‎‎• If you want to download an Instagram post/reel simply paste it's URL and click Download
 ```
 ```
 That's it! We am just starting out on implementing new futures, keep an eye for new releases
