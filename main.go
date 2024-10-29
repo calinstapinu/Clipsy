@@ -297,6 +297,26 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
+//func instagramDownloaderHandler(w http.ResponseWriter, r *http.Request) {
+//	tmpl, err := template.ParseFiles("Front/instagram_downloader.html") // Create this HTML file
+//	if err != nil {
+//		http.Error(w, "Error loading template", http.StatusInternalServerError)
+//		return
+//	}
+//
+//	w.Header().Set("Content-Type", "text/html")
+//	tmpl.Execute(w, nil)
+//}
+
+//func downloadInstagramHandler(w http.ResponseWriter, r *http.Request) {
+//	if r.Method == http.MethodPost {
+//		url := r.FormValue("url")
+//
+//	} else {
+//		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+//	}
+//}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -317,6 +337,8 @@ func main() {
 	http.HandleFunc("/auth/github", authHandler)
 	http.HandleFunc("/auth/github/callback", callbackHandler(db))
 	http.HandleFunc("/logout", logoutHandler)
+	//http.HandleFunc("/instagram-downloader", instagramDownloaderHandler)
+	//http.HandleFunc("/download-instagram", downloadInstagramHandler)
 
 	http.Handle("/Front/", http.StripPrefix("/Front/", http.FileServer(http.Dir("Front"))))
 
