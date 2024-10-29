@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/google/go-github/v39/github"
 	"github.com/joho/godotenv"
@@ -321,25 +323,49 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
-//func instagramDownloaderHandler(w http.ResponseWriter, r *http.Request) {
-//	tmpl, err := template.ParseFiles("Front/instagram_downloader.html") // Create this HTML file
-//	if err != nil {
-//		http.Error(w, "Error loading template", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	w.Header().Set("Content-Type", "text/html")
-//	tmpl.Execute(w, nil)
-//}
+func instagramDownloaderHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("Front/instagram_downloader.html")
+	if err != nil {
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	tmpl.Execute(w, nil)
+}
 
-//func downloadInstagramHandler(w http.ResponseWriter, r *http.Request) {
-//	if r.Method == http.MethodPost {
-//		url := r.FormValue("url")
-//
-//	} else {
-//		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//	}
-//}
+func downloadInstagramHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse the form to get the Instagram URL
+	url := r.FormValue("url")
+	if url == "" {
+		http.Error(w, "URL is required", http.StatusBadRequest)
+		return
+	}
+
+	// Prepare JSON payload to send to the FastAPI server
+	requestBody, _ := json.Marshal(map[string]string{"url": url})
+
+	// Send a POST request to the FastAPI server
+	resp, err := http.Post("http://localhost:8000/download", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		http.Error(w, "Failed to connect to Instagram download server", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the response from the FastAPI server
+	if resp.StatusCode == http.StatusOK {
+		// Send a success message as the response
+		fmt.Fprint(w, "Video downloaded successfully!")
+	} else {
+		// Send an error message as the response
+		http.Error(w, "Failed to download Instagram post", http.StatusBadRequest)
+	}
+}
 
 func main() {
 	err := godotenv.Load()
@@ -362,8 +388,8 @@ func main() {
 	http.HandleFunc("/auth/github/callback", callbackHandler(db))
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/view", viewVideoHandler(db))
-	//http.HandleFunc("/instagram-downloader", instagramDownloaderHandler)
-	//http.HxandleFunc("/download-instagram", downloadInstagramHandler)
+	http.HandleFunc("/instagram-downloader", instagramDownloaderHandler)
+	http.HandleFunc("/download-instagram", downloadInstagramHandler)
 
 	http.Handle("/Front/", http.StripPrefix("/Front/", http.FileServer(http.Dir("Front"))))
 
