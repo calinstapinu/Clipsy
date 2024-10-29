@@ -34,7 +34,7 @@ type User struct {
 var (
 	oauth2Config = &oauth2.Config{
 		ClientID:     "Ov23li2sU5eoKNPdcAYc",
-		ClientSecret: "f36cc218ba891c5a850250db76b2e263e70768f9",
+		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		RedirectURL:  "http://localhost:6969/auth/github/callback",
 		Scopes:       []string{"user:email"},
 		Endpoint: oauth2.Endpoint{
@@ -45,15 +45,6 @@ var (
 	state string
 )
 
-func generateRandomString(length int) (string, error) {
-	bytes := make([]byte, length)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(bytes), nil
-}
-
 // Initialize state with a secure random string
 func init() {
 	var err error
@@ -61,6 +52,15 @@ func init() {
 	if err != nil {
 		log.Fatal("Failed to generate state:", err)
 	}
+}
+
+func generateRandomString(length int) (string, error) {
+	bytes := make([]byte, length)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(bytes), nil
 }
 
 func initDB() (*sql.DB, error) {
@@ -85,7 +85,7 @@ func initDB() (*sql.DB, error) {
 
 func uploadVideoHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Handling upload request:", r.Method, r.URL.Path)
+		//log.Println("Handling upload request:", r.Method, r.URL.Path)
 
 		if r.Method != http.MethodPost {
 			log.Println("Request method not allowed:", r.Method)
@@ -222,7 +222,7 @@ func downloadVideoHandler(db *sql.DB) http.HandlerFunc {
 
 func mainPageHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Serving main page")
+		//log.Println("Serving main page")
 		// Query the database for all videos
 		rows, err := db.Query("SELECT id, title, description, genre, upload_date FROM videos")
 		if err != nil {
@@ -253,25 +253,25 @@ func mainPageHandler(db *sql.DB) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "text/html")
-		log.Println("Executing main page template")
+		//log.Println("Executing main page template")
 		tmpl.Execute(w, videos)
 	}
 }
 
 // Auth handler for GitHub login
 func authHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Client ID:", os.Getenv("GITHUB_CLIENT_ID"))
-	log.Println("Client Secret:", os.Getenv("GITHUB_CLIENT_SECRET"))
+	//log.Println("Client ID:", os.Getenv("GITHUB_CLIENT_ID"))
+	//log.Println("Client Secret:", os.Getenv("GITHUB_CLIENT_SECRET"))
 
 	url := oauth2Config.AuthCodeURL(state)
-	log.Println("Redirecting to URL:", url) // Add this log line to debug the URL
+	//log.Println("Redirecting to URL:", url) // Add this log line to debug the URL
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func callbackHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.FormValue("code")
-		log.Println("Received code:", code) // Log the received code
+		//log.Println("Received code:", code) // Log the received code
 
 		token, err := oauth2Config.Exchange(r.Context(), code)
 		if err != nil {
@@ -300,16 +300,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Current working directory:", wd)
-
-	// After loading, log the values to check if they're loaded correctly
-	log.Println("Client ID:", os.Getenv("GITHUB_CLIENT_ID"))
-	log.Println("Client Secret:", os.Getenv("GITHUB_CLIENT_SECRET"))
 
 	db, err := initDB()
 	if err != nil {
