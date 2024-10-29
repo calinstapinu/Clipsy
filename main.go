@@ -5,16 +5,14 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
-	"html/template"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"os"
-
 	"github.com/google/go-github/v39/github"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/oauth2"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 type Video struct {
@@ -34,7 +32,7 @@ type User struct {
 var (
 	oauth2Config = &oauth2.Config{
 		ClientID:     "Ov23li2sU5eoKNPdcAYc",
-		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+		ClientSecret: "",
 		RedirectURL:  "http://localhost:6969/auth/github/callback",
 		Scopes:       []string{"user:email"},
 		Endpoint: oauth2.Endpoint{
@@ -295,6 +293,10 @@ func callbackHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -314,6 +316,7 @@ func main() {
 	http.HandleFunc("/download", downloadVideoHandler(db))
 	http.HandleFunc("/auth/github", authHandler)
 	http.HandleFunc("/auth/github/callback", callbackHandler(db))
+	http.HandleFunc("/logout", logoutHandler)
 
 	http.Handle("/Front/", http.StripPrefix("/Front/", http.FileServer(http.Dir("Front"))))
 
