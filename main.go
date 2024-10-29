@@ -218,6 +218,30 @@ func downloadVideoHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func viewVideoHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Query().Get("id")
+		if id == "" {
+			http.Error(w, "Missing video ID", http.StatusBadRequest)
+			return
+		}
+
+		var title string
+		var videoData []byte
+		err := db.QueryRow("SELECT title, video FROM videos WHERE id = ?", id).Scan(&title, &videoData)
+		if err != nil {
+			log.Println("Video not found:", err)
+			http.Error(w, "Video not found", http.StatusNotFound)
+			return
+		}
+
+		// Set headers for video streaming
+		w.Header().Set("Content-Type", "video/mp4")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s.mp4", title))
+		w.Write(videoData)
+	}
+}
+
 func mainPageHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//log.Println("Serving main page")
@@ -337,8 +361,9 @@ func main() {
 	http.HandleFunc("/auth/github", authHandler)
 	http.HandleFunc("/auth/github/callback", callbackHandler(db))
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/view", viewVideoHandler(db))
 	//http.HandleFunc("/instagram-downloader", instagramDownloaderHandler)
-	//http.HandleFunc("/download-instagram", downloadInstagramHandler)
+	//http.HxandleFunc("/download-instagram", downloadInstagramHandler)
 
 	http.Handle("/Front/", http.StripPrefix("/Front/", http.FileServer(http.Dir("Front"))))
 
