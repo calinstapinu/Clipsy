@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram Downloader</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Instagram Post/Reel Downloader</h1>
+  <form id="downloader-form" method="POST" action="/download-instagram">
+    <input type="text" name="url" placeholder="Enter Instagram post/reel URL" required class="border rounded-md p-2 w-full mb-4">
+    <input type="submit" value="Download" class="bg-purple-500 text-white rounded-md p-2 w-full cursor-pointer transition duration-900 ease-in-out transform hover:bg-purple-900">
+  </form>
+</div>
+</body>
+</html>
