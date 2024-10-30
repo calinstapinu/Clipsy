@@ -18,7 +18,7 @@ Clipsy is crafted to be powerful yet user-friendly, making video organization in
 <br/>
 <div class="badges-gif">
   <p align="right">
-    <img src="/media/intermiediategif.gif" width=100% align=center alt=Clipsy>
+    <img src="/media/this.gif" width=100% align=center alt=Clipsy>
     <br><br>
   </p>
 </div>
